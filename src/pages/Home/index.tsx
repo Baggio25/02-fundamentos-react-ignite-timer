@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Play } from "phosphor-react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,9 +21,18 @@ const newCycleFormValidationSchema = zod.object({
                     .max(60, 'O ciclo precisa ser de no máximo 60min')
 })
 
-type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
+type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>;
+
+interface Cycle {
+  id: string;
+  task: string;
+  minutesAmount: number
+}
 
 export function Home() {
+  const [cycles, setCycles] = useState<Cycle[]>([]);
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
+
   const { register, handleSubmit, watch, reset } = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
     defaultValues: {
@@ -32,6 +42,14 @@ export function Home() {
   });
 
   function handleCreateNewCycle(data: NewCycleFormData) {
+    const newCycle: Cycle = {
+      id: String(new Date().getTime()), //retorna a data atual em milissegundos
+      task: data.task,
+      minutesAmount: data.minutesAmount
+    }
+
+    setCycles(state => [...state, newCycle]);
+
     reset();
   }
 
